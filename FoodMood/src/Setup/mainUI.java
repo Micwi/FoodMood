@@ -5,61 +5,51 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.StringTokenizer;
-import java.util.Vector;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
 
 
-
-
-
-
 public class mainUI {
 
-	public JFrame frame;
 	private JComboBox<String> moodMenu;
 	private ArrayList<String> moods = new ArrayList<String>();
-	private String[] moodArray = {"Happy", "Stressed", "Sad"};
+	private String[] moodArray; //get all the files that exist in proper directory (Stored) to fill combobox values with proper names of moods
 	private JTable table;
 	private ArrayList<Object> obj = new ArrayList<Object>();
 	private DefaultTableModel tableModel;
-	public mainUI() {
-		
-		initialize();
-	}
 	
-	
-	private void initialize() {
-		frame = new JFrame();
-		frame.setBounds(100, 100, 695, 649);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setResizable(false);
-		frame.setLocationRelativeTo(null);
+	public void initialize() {
+		setupUI.cleanFrame();
 		moodInitialize();
 		createMoodCBox();
 		mainUIComponents();
 		createMainUITable();
 		addMoodButton();
+		setupUI.frame.setVisible(true);
 	}
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		setupView();
-
+		setupUI.createMainFrame();
+		mainUI MUI = new mainUI();
+		MUI.initialize();
 	}
 	//adds moods to arraylist from array. So new moods can be added to existing list using moodAdd()
 	public void moodInitialize() {
+		
+		File moodDirectory = new File("FoodMood/src/TextFiles/");
+		moodArray = moodDirectory.list();
+		String [] names = new String[moodArray.length];
+		for(int i = 0; i < moodArray.length;i++) {
+			names[i] = moodArray[i].replace(".txt", "");
+		}
 		for (int i = 0; i < moodArray.length; i++) {
-			moods.add(moodArray[i]);
+			moods.add(names[i]);
 		}
 	}
 	public void moodAdd(String mood) {
@@ -71,9 +61,12 @@ public class mainUI {
 		for (int i = 0; i < moods.size(); i++) {
 			moodMenu.addItem(moods.get(i));
 		}
-		frame.getContentPane().setLayout(null);
+		
+		setupUI.frame.getContentPane().setLayout(null);
+		
 		moodMenu.setFont(new Font("Lucida Grande", Font.PLAIN, 20));
-		frame.getContentPane().add(moodMenu);
+		moodMenu.setSelectedItem(null);
+		setupUI.frame.getContentPane().add(moodMenu);
 		
 	}
 	public void mainUIComponents() {
@@ -81,23 +74,24 @@ public class mainUI {
 		moodLabel.setBounds(78, 124, 100, 35);
 		moodLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		moodLabel.setFont(new Font("Tahoma", Font.BOLD, 18));
-		frame.getContentPane().add(moodLabel);
+		setupUI.frame.getContentPane().add(moodLabel);
 		
 		JLabel mainUILabel = new JLabel("FoodMood");
 		mainUILabel.setFont(new Font("Tahoma", Font.BOLD, 20));
 		mainUILabel.setBounds(254, 43, 194, 35);
 		mainUILabel.setHorizontalAlignment(SwingConstants.CENTER);
-		frame.getContentPane().add(mainUILabel);
+		setupUI.frame.getContentPane().add(mainUILabel);
 	}
 	public void addMoodButton() {
 		JButton addMoodBtn = new JButton("Add Mood");
 		addMoodBtn.setBounds(426, 528, 232, 49);
 		addMoodBtn.setFont(new Font("Tahoma", Font.BOLD, 15));
-		frame.getContentPane().add(addMoodBtn);
+		setupUI.frame.getContentPane().add(addMoodBtn);
 		addMoodBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				addMood addM = new addMood();
-				addM.frame.setVisible(true);
+				addM.initialize();
+				setupUI.frame.setVisible(true);
 			}
 			
 		});
@@ -126,7 +120,7 @@ public class mainUI {
 			
 			JScrollPane gPane = new JScrollPane();
 			gPane.setBounds(203, 196, 296, 173);
-			frame.getContentPane().add(gPane);
+			setupUI.frame.getContentPane().add(gPane);
 			gPane.setViewportView(table);
 		}catch(Exception e) {
 			System.out.println(e);
@@ -147,25 +141,15 @@ public class mainUI {
 		
 	}
 	public void moodSelect(String mood) {
-		switch(mood) {
 		
-		case "Happy":
-			happyMoodFile(tableModel);
-			break;
-		case "Sad":
-			sadMoodFile(tableModel);
-			break;
-		case "Stressed":
-			stressedMoodFile(tableModel);
-			break;
-		}
+		loadMoodFile(tableModel, mood);
+	
 	}
-		
-	public void happyMoodFile(DefaultTableModel model) {
+	public void loadMoodFile(DefaultTableModel model, String filename) {
 		try {
 			String str = null;
-			URL url = getClass().getResource("/TextFiles/Happy.txt"); // gets file path for File constructor
-			File file = new File(url.getPath());
+			 // gets file path for File constructor
+			File file = new File("FoodMood/src/TextFiles/" + filename + ".txt");
 			BufferedReader br = new BufferedReader(new FileReader(file)); //reads from file
 			Object[] obj = br.lines().toArray(); //takes values from file and puts into object array
 			model.setRowCount(0); //clears the table before adding new data
@@ -179,52 +163,18 @@ public class mainUI {
 			System.out.println("Error: " + e);
 		}
 		
-	}
-	public void sadMoodFile(DefaultTableModel model) {
-		try {
-			String str = null;
-			URL url = getClass().getResource("/TextFiles/Sad.txt"); // gets file path for File constructor
-			File file = new File(url.getPath());
-			BufferedReader br = new BufferedReader(new FileReader(file)); //reads from file
-			Object[] obj = br.lines().toArray(); //takes values from file and puts into object array
-			model.setRowCount(0); //clears the table before adding new data
-			for(int i = 0; i < obj.length; i++) {
-				str = obj[i].toString().trim();
-				String[] data = str.split("\n");// String array containing all data without excess values
-				model.addRow(data); // adds data to table model
-			}
-		}catch(Exception e) {
-			System.out.println("Error: " + e);
-		}
-	}
-	public void stressedMoodFile (DefaultTableModel model) {
-		try {
-			String str = null;
-			URL url = getClass().getResource("/TextFiles/Stressed.txt"); // gets file path for File constructor
-			File file = new File(url.getPath());
-			BufferedReader br = new BufferedReader(new FileReader(file)); //reads from file
-			Object[] obj = br.lines().toArray(); //takes values from file and puts into object array
-			model.setRowCount(0); //clears the table before adding new data
-			for(int i = 0; i < obj.length; i++) {
-				str = obj[i].toString().trim();
-				String[] data = str.split("\n");// String array containing all data without excess values
-				model.addRow(data); // adds data to table model
-			}
-		}catch(Exception e) {
-			System.out.println("Error: " + e);
-		}
-	}
+	}	
 	
-	public static void setupView() {
+	
+	/*public static void setupView() {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					mainUI window = new mainUI();
-					window.frame.setVisible(true);
+					setupUI.frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		});
-	}
+	}*/
 }

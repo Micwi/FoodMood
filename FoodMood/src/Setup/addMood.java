@@ -7,14 +7,11 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.util.ArrayList;
+import java.util.Vector;
 
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
@@ -25,7 +22,6 @@ import javax.swing.JButton;
 
 public class addMood {
 
-	public JFrame frame;
 	private JTextField addMoodTF;
 	private JTextField addFoodTF;
 	private JTable table;
@@ -33,27 +29,23 @@ public class addMood {
 	private File file;
 	private String addedMood;
 	private String addedFood;
-
-	public addMood() {
-		frame = new JFrame();
-		frame.setBounds(100, 100, 695, 649);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setResizable(false);
-		frame.setLocationRelativeTo(null);
-
+	
+	
+	public void initialize() {
+		setupUI.cleanFrame();
+		
 		addMenuComponents();
 	}
 
 	public void addMenuComponents() {
-		frame.getContentPane().setLayout(null);
 		JLabel addMoodUILabel = new JLabel("Add Mood");
 		addMoodUILabel.setBounds(254, 43, 194, 35);
 		addMoodUILabel.setHorizontalAlignment(SwingConstants.CENTER);
 		addMoodUILabel.setFont(new Font("Tahoma", Font.BOLD, 20));
-		frame.getContentPane().add(addMoodUILabel);
+		setupUI.frame.getContentPane().add(addMoodUILabel);
 
 		addStuffToFile();
-
+		finishAdding();
 	}
 
 	public void addStuffToFile() {
@@ -61,9 +53,9 @@ public class addMood {
 		moodLabel.setBounds(52, 124, 126, 35);
 		moodLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		moodLabel.setFont(new Font("Tahoma", Font.BOLD, 18));
-		frame.getContentPane().add(moodLabel);
+		setupUI.frame.getContentPane().add(moodLabel);
 
-		ArrayList<String> newFoodArray = new ArrayList<String>(); // array for new added food
+		 // array for new added food
 		// table
 		table = new JTable() {
 			private static final long serialVersionUID = 1L;
@@ -87,7 +79,7 @@ public class addMood {
 
 			JScrollPane gPane = new JScrollPane(table);
 			gPane.setBounds(203, 196, 296, 173);
-			frame.getContentPane().add(gPane);
+			setupUI.frame.getContentPane().add(gPane);
 			gPane.setViewportView(table);
 		} catch (Exception e) {
 			System.out.println(e);
@@ -97,43 +89,94 @@ public class addMood {
 		addFoodTF.setHorizontalAlignment(SwingConstants.CENTER);
 		addFoodTF.setFont(new Font("Tahoma", Font.BOLD, 20));
 		addFoodTF.setColumns(10);
-		addFoodTF.setBounds(254, 409, 211, 60);
-		frame.getContentPane().add(addFoodTF);
-		addedFood = addFoodTF.getText(); // add to txt file for added mood
+		addFoodTF.setBounds(203, 399, 211, 60);
+		setupUI.frame.getContentPane().add(addFoodTF);
 
 		addMoodTF = new JTextField();
 		addMoodTF.setFont(new Font("Tahoma", Font.BOLD, 20));
-		addMoodTF.setHorizontalAlignment(SwingConstants.CENTER); //Figure out why addedMood TF doesnt display name and why file button isnt putting data in table. And why file isnt saved in right place 
-		//(textfiles)
+		addMoodTF.setHorizontalAlignment(SwingConstants.CENTER); 
 		addMoodTF.setBounds(203, 110, 296, 60);
-		frame.getContentPane().add(addMoodTF);
+		setupUI.frame.getContentPane().add(addMoodTF);
 		addMoodTF.setColumns(10);
-		addedMood = "String " + addMoodTF.getText(); // set name of new text file to this name .txt
-		System.out.println(addedMood);
-		JButton addFoodButton = new JButton("Add");
+		JButton addFoodButton = new JButton(" Add Food");
 		addFoodButton.setFont(new Font("Tahoma", Font.BOLD, 13));
-		addFoodButton.setBounds(296, 493, 126, 42);
-		frame.getContentPane().add(addFoodButton);
+		addFoodButton.setBounds(440, 410, 126, 42);
+		setupUI.frame.getContentPane().add(addFoodButton);
+		
+		
+		
 		addFoodButton.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
-				// new file creation
-				file = new File(addedMood + ".txt");
-				System.out.println("Path: " + file.getAbsolutePath());
+			
+				addedFood = addFoodTF.getText(); // add to txt file for added mood
+				addFoodTF.setText("");
+				System.out.println("New Food: "+ addedFood);
 				
+				
+				tableModel.addRow(new String[] {addedFood});
+				
+				System.out.println("Food Array Contents: " + tableModel.getDataVector());
+				for(Vector currentElement : tableModel.getDataVector()) {
+					System.out.println("s value: " + currentElement.get(0));
+				}
+			}
+		});
+		
+		JButton backButton = new JButton("Back");
+		backButton.setFont(new Font("Tahoma", Font.BOLD, 13));
+		backButton.setBounds(20, 43, 100, 35);
+		setupUI.frame.getContentPane().add(backButton);
+		backButton.addActionListener(new ActionListener() {
+
+			
+			public void actionPerformed(ActionEvent e) {
+				mainUI MUI = new mainUI();
+				MUI.initialize();
+				setupUI.frame.setVisible(true);
+				
+			}
+			
+		});
+	}
+
+	public void finishAdding() {
+		JButton addMood_FinishBtn = new JButton("Finish");
+		addMood_FinishBtn.setFont(new Font("Tahoma", Font.BOLD, 13));
+		addMood_FinishBtn.setBounds(288, 504, 126, 42);
+		setupUI.frame.getContentPane().add(addMood_FinishBtn);
+		addMood_FinishBtn.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				// new file creation
+				addedMood = addMoodTF.getText();// set name of new text file to this name .txt
+				file = new File("FoodMood/src/TextFiles/" + addedMood + ".txt");
+
 				try {
-					BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-					writer.write(addedFood);
-					System.out.println("Hello");
+					FileWriter writer = new FileWriter(file);
+					for(Vector currentElement : tableModel.getDataVector()) {
+						writer.write(currentElement.get(0).toString());
+						writer.write("\n");
+					}
+					
 					writer.close();
+					
+					mainUI MUI = new mainUI();
+					MUI.initialize();
+					setupUI.frame.setVisible(true);
+					
+					if(addMoodTF.getText().isEmpty()) {
+						setupUI.alert("Mood field left blank!");
+					}
+					
 				} catch (FileNotFoundException ex) {
 					System.out.println("The file was not found on this system.");
 				} catch (IOException exc) {
 					exc.printStackTrace();
 				}
-				tableModel.insertRow(0, new Object[] { addedFood });
+
 			}
 		});
-
 	}
+	
 }
